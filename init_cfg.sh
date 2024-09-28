@@ -12,7 +12,7 @@ systemctl restart sshd
 
 # profile bashrc settting
 echo 'alias vi=vim' >> /etc/profile
-echo "sudo su -" >> .bashrc
+echo "su -" >> .bashrc
 
 # Letting iptables see bridged traffic
 cat <<EOF >  /etc/sysctl.d/k8s.conf
@@ -29,31 +29,59 @@ for (( i=1; i<=$1; i++  )); do echo "192.168.100.10$i k8s-w$i" >> /etc/hosts; do
 systemctl stop apparmor && systemctl disable apparmor
 
 # package install
-apt update
-apt-get install bridge-utils net-tools jq tree resolvconf wireguard -y
 
-# config dnsserver ip
-echo -e "nameserver 168.126.63.1\nnameserver 8.8.8.8" > /etc/resolvconf/resolv.conf.d/head
-resolvconf -u
 
-# docker install
-curl -fsSL https://get.docker.com | sh
-
-# Cgroup Driver systemd
-cat <<EOF | tee /etc/docker/daemon.json
-{"exec-opts": ["native.cgroupdriver=systemd"]}
-EOF
-systemctl daemon-reload && systemctl restart docker
-
-# swap off
-swapoff -a
-
-# Installing kubeadm kubelet and kubectl
-curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-focal main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+# Update the package lists
 apt-get update
-#apt-get install -y kubelet kubeadm kubectl
-#apt-get install -y kubelet=<VERSION> kubectl=<VERSION> kubeadm=<VERSION>
+
+# Install necessary packages
+apt-get install -y apt-transport-https ca-certificates curl
+
+# Download Google Cloud public signing key
+curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+# Add Kubernetes APT repository
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
+
+# Update package lists again
+apt-get update
+
+# Install Kubernetes packages (specific version)
 apt-get install -y kubelet=1.21.8-00 kubectl=1.21.8-00 kubeadm=1.21.8-00
+
+# Hold the packages at the installed version
 apt-mark hold kubelet kubeadm kubectl
+
+# Enable and start kubelet
 systemctl enable kubelet && systemctl start kubelet
+
+
+
+# apt update
+# apt-get install bridge-utils net-tools jq tree resolvconf wireguard -y
+
+# # config dnsserver ip
+# echo -e "nameserver 168.126.63.1\nnameserver 8.8.8.8" > /etc/resolvconf/resolv.conf.d/head
+# resolvconf -u
+
+# # docker install
+# curl -fsSL https://get.docker.com | sh
+
+# # Cgroup Driver systemd
+# cat <<EOF | tee /etc/docker/daemon.json
+# {"exec-opts": ["native.cgroupdriver=systemd"]}
+# EOF
+# systemctl daemon-reload && systemctl restart docker
+
+# # swap off
+# swapoff -a
+
+# # Installing kubeadm kubelet and kubectl
+# curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+# echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-focal main" | tee /etc/apt/sources.list.d/kubernetes.list
+# apt-get update
+# #apt-get install -y kubelet kubeadm kubectl
+# #apt-get install -y kubelet=<VERSION> kubectl=<VERSION> kubeadm=<VERSION>
+# apt-get install -y kubelet=1.21.8-00 kubectl=1.21.8-00 kubeadm=1.21.8-00
+# apt-mark hold kubelet kubeadm kubectl
+# systemctl enable kubelet && systemctl start kubelet
