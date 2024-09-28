@@ -23,8 +23,8 @@ Vagrant.configure("2") do |config|
       subconfig.vm.synced_folder "./", "/vagrant", disabled: true
       subconfig.vm.network "private_network", ip: "192.168.100.10"
       subconfig.vm.network "forwarded_port", guest: 22, host: 50010, auto_correct: true, id: "ssh"
-      subconfig.vm.provision "shell", path: "https://raw.githubusercontent.com/gasida/NDKS/main/3/init_cfg.sh", args: N
-      subconfig.vm.provision "shell", path: "https://raw.githubusercontent.com/gasida/NDKS/main/3/master.sh" 
+      subconfig.vm.provision "shell", path: "https://raw.githubusercontent.com/jc3wrld999/k8s/refs/heads/master/init_cfg.sh", args: N
+      subconfig.vm.provision "shell", path: "https://raw.githubusercontent.com/jc3wrld999/k8s/refs/heads/master/master.sh" 
     end
 
 #-----Worker Node
@@ -42,8 +42,8 @@ Vagrant.configure("2") do |config|
       subconfig.vm.synced_folder "./", "/vagrant", disabled: true
       subconfig.vm.network "private_network", ip: "192.168.100.10#{i}"
       subconfig.vm.network "forwarded_port", guest: 22, host: "5001#{i}", auto_correct: true, id: "ssh"
-      subconfig.vm.provision "shell", path: "https://raw.githubusercontent.com/gasida/NDKS/main/3/init_cfg.sh", args: N
-      subconfig.vm.provision "shell", path: "https://raw.githubusercontent.com/gasida/NDKS/main/3/worker.sh"
+      subconfig.vm.provision "shell", path: "https://raw.githubusercontent.com/jc3wrld999/k8s/refs/heads/master/init_cfg.sh", args: N
+      subconfig.vm.provision "shell", path: "https://raw.githubusercontent.com/jc3wrld999/k8s/refs/heads/master/worker.sh"
     end
   end
 
